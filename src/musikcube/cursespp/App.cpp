@@ -56,6 +56,8 @@
 #include <csignal>
 #include <cstdlib>
 #include <locale.h>
+#include <term.h>
+#include <unistd.h>
 #endif
 
 using namespace cursespp;
@@ -286,6 +288,16 @@ App::~App() {
 }
 
 void App::InitCurses() {
+#ifndef WIN32
+    /* The setupterm() call below will see if the current TERM configuration is
+    available. If not, it will use 'xterm-256-color' as a fallback, which should
+    generally be available and compatible on Unix systems */
+    int err = 0;
+    if (setupterm(NULL, fileno(stdout), &err) != OK) {
+        setenv("TERM", "xterm-256color", 1);
+    }
+#endif
+
     initscr();
     nonl();
     cbreak();
